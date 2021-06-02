@@ -36,6 +36,8 @@ var argv = yargs
   .alias('h', 'help')
   .argv
 
+console.log(argv)
+
 if (!argv['buildNumber']) {
   console.log('build number must be specified')
   return process.exit(1)
