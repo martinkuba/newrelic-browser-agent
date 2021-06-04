@@ -8,7 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     container: circleci/node:14-browsers 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Permission Setup
+        run: sudo chmod -R 777 /github /__w
       - name: build
         run: npm run ci-build
       - name: run tests
