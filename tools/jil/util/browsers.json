@@ -12,7 +12,13 @@
     },
     {
       "browserName": "chrome",
-      "platform": "Windows 10",
+      "platform": "linux",
+      "version": "latest",
+      "includeWithAll": false
+    },
+    {
+      "browserName": "chrome",
+      "platform": "10",
       "version": "61",
       "comment": "Native support for JavaScript modules"
     },
