@@ -1,4 +1,4 @@
-name: Tests
+name: Headless Tests
 
 on:
   workflow_dispatch:
