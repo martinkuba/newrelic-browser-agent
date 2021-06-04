@@ -19,4 +19,4 @@ jobs:
         run: npm run ci-build
 
       - name: run tests
-        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest/linux -t 85000 --no-retry --selenium-server=localhost:4444
+        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest/linux -t 85000 --no-retry --selenium-server=0.0.0.0:4444
