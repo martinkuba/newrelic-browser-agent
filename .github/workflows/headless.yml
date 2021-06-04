@@ -12,7 +12,7 @@ jobs:
       - name: install node
         run: |
           sudo apt update
-          DEBIAN_FRONTEND=noninteractive sudo apt install nodejs
+          sudo DEBIAN_FRONTEND=noninteractive apt install nodejs
       - name: build
         run: npm run ci-build
 
