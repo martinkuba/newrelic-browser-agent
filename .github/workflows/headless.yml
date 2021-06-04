@@ -6,7 +6,7 @@ on:
 jobs:
   headless-chrome:
     runs-on: ubuntu-latest
-    container: selenium/standalone-chrome
+    container: node:14
     steps:
       - uses: actions/checkout@v2
       - name: install node
