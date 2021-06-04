@@ -6,15 +6,10 @@ on:
 jobs:
   headless-chrome:
     runs-on: ubuntu-latest
-    container: node:14
+    container: circleci/node:14-browsers 
     steps:
       - uses: actions/checkout@v2
-      - name: install node
-        run: |
-          sudo apt update
-          sudo apt install nodejs
       - name: build
         run: npm run ci-build
-
       - name: run tests
         run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest/linux -t 85000 --no-retry --selenium-server=localhost:4444
