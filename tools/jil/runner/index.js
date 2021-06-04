@@ -118,7 +118,7 @@ function loadBrowsersAndRunTests () {
     let desired = browser.desired
     let connectionInfo = {}
 
-    if (!browser.isPhantom()) {
+    if (!browser.isPhantom() && !browser.isLocalChrome()) {
       desired['tunnel-identifier'] = tunnelIdentifier
 
       if (config.seleniumServer) {
@@ -126,6 +126,12 @@ function loadBrowsersAndRunTests () {
       } else {
         let sauceCreds = getSauceLabsCreds()
         connectionInfo = `http://${sauceCreds.username}:${sauceCreds.accessKey}@ondemand.saucelabs.com/wd/hub`
+      }
+    }
+
+    if (browser.isLocalChrome()) {
+      desired.chromeOptions = {
+        args: ['--headless', '--disable-gpu', '--window-size=800,600']
       }
     }
 

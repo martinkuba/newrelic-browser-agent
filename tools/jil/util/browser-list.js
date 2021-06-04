@@ -19,6 +19,10 @@ class BrowserSpec {
     return this.desired.browserName === 'phantom'
   }
 
+  isLocalChrome() {
+    return this.desired.browserName === 'chrome' && this.desired.platform === 'linux'
+  }
+
   toString () {
     return `${this.browserName}@${this.version} (${this.platformName})`
   }
@@ -98,18 +102,23 @@ function browserList (pattern = 'phantom@latest') {
 }
 
 function parse (pattern) {
-  let [browser, range] = pattern.split('@')
-  return getBrowsersFor(browser || 'phantom', range)
+  let [browserFull, platform] = pattern.split('/')
+  let [browser, range] = browserFull.split('@')
+  return getBrowsersFor(browser || 'phantom', range, platform)
 }
 
-function getBrowsersFor (browser, range) {
+function getBrowsersFor (browser, range, platform) {
   let list = []
   if (allowedBrowsers[browser]) list = allowedBrowsers[browser].slice()
-  else if (browser === '*') list = Object.keys(allowedBrowsers).reduce(merge, [])
+  else if (browser === '*') {
+    list = Object.keys(allowedBrowsers)
+    .reduce(merge, [])
+    .filter(filterForAll)
+  }
 
   list.sort(byVersion)
 
-  if (!range) {
+  if (!range && !platform) {
     return list
   } else if (range === 'beta') {
     return list.filter(findBetaVersions)
@@ -125,6 +134,11 @@ function getBrowsersFor (browser, range) {
     if (option.platformVersion === 'beta' || option.version === 'beta') {
       return false
     }
+
+    if (platform && option.platform.toLowerCase() !== platform.toLowerCase()) {
+      return false
+    }
+
     return semver.satisfies(cleanVersion(option.platformVersion || option.version), range)
   }
 
@@ -133,7 +147,14 @@ function getBrowsersFor (browser, range) {
   }
 
   function findLatestVersions (option) {
+    if (platform && option.platform.toLowerCase() !== platform.toLowerCase()) {
+      return false
+    }
     return (option.version === 'latest')
+  }
+
+  function filterForAll(option) {
+    return option.includeWithAll !== false
   }
 }
 
