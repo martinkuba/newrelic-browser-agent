@@ -28,7 +28,8 @@ function getSauceLabsCreds () {
 function startExternalServices (browsers, config, cb) {
   let needPhantom = Array.from(browsers).filter((b) => b.isPhantom()).length
   let needSauce = !!config.sauce
-  let needChromeDriver = Array.from(browsers).filter((b) => b.isLocalChrome()).length
+  // let needChromeDriver = Array.from(browsers).filter((b) => b.isLocalChrome()).length
+  let needChromeDriver = false
 
   if (!needPhantom && !needSauce && !needChromeDriver) return cb()
 
