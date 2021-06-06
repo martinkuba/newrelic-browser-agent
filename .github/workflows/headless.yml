@@ -6,19 +6,13 @@ on:
 jobs:
   headless-chrome:
     runs-on: ubuntu-latest
-    container: selenium/standalone-chrome
+    container: circleci/node:12-browsers
     steps:
       - uses: actions/checkout@v1
       - name: permissions
         run: sudo chmod -R 777 /github /__w
-      - name: install node
-        run: |
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          sudo service supervisor start
-          ps aux
       - name: build
         run: npm run ci-build
 
       - name: run tests
-        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest/linux -t 85000 --no-retry --selenium-server=0.0.0.0:4444
+        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest/linux -t 85000 --no-retry

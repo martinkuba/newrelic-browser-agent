@@ -19,6 +19,10 @@ class BrowserSpec {
     return this.desired.browserName === 'phantom'
   }
 
+  isLocalChrome() {
+    return this.desired.browserName === 'chrome' && this.desired.platform === 'linux'
+  }
+
   toString () {
     return `${this.browserName}@${this.version} (${this.platformName})`
   }

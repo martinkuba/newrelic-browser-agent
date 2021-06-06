@@ -98,6 +98,7 @@ function getBuildIdentifier() {
 
 function loadBrowsersAndRunTests () {
   let browsers = browserList(config.browsers)
+
   if (!browsers || browsers.length === 0) {
     console.log('No browsers matched: ' + config.browsers)
     return process.exit(1)
@@ -118,7 +119,7 @@ function loadBrowsersAndRunTests () {
     let desired = browser.desired
     let connectionInfo = {}
 
-    if (!browser.isPhantom()) {
+    if (!browser.isPhantom() && !browser.isLocalChrome()) {
       desired['tunnel-identifier'] = tunnelIdentifier
 
       if (config.seleniumServer) {

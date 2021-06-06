@@ -7,6 +7,7 @@ const sauceConnectLauncher = require('sauce-connect-launcher')
 const os = require('os')
 const childProcess = require('child_process')
 const phantomjs = require('phantomjs-prebuilt')
+const chromedriver = require('chromedriver')
 
 let externalServices = new Set()
 
@@ -27,13 +28,15 @@ function getSauceLabsCreds () {
 function startExternalServices (browsers, config, cb) {
   let needPhantom = Array.from(browsers).filter((b) => b.isPhantom()).length
   let needSauce = !!config.sauce
+  let needChromeDriver = Array.from(browsers).filter((b) => b.isLocalChrome()).length
 
-  if (!needPhantom && !needSauce) return cb()
+  if (!needPhantom && !needSauce && !needChromeDriver) return cb()
 
-  let remaining = [needPhantom, needSauce].filter(Boolean).length
+  let remaining = [needPhantom, needSauce, needChromeDriver].filter(Boolean).length
 
   if (needPhantom) startPhantom(checkDone)
   if (needSauce) startSauce(config, checkDone)
+  if (needChromeDriver) startChromeDriver(checkDone)
 
   function checkDone () {
     if (--remaining) return
@@ -59,6 +62,31 @@ function startPhantom (cb) {
   child.stdout.on('data', (data) => {
     if (data.indexOf('running on port') !== -1) {
       clearTimeout(timeout)
+      child.stdout.removeAllListeners()
+      cb()
+      cb = function noop () {}
+    }
+  })
+
+  child.stderr.pipe(process.stderr)
+  process.on('exit', () => child.kill())
+
+  externalServices.add(child)
+  child.on('exit', () => externalServices.delete(child))
+
+  return child
+}
+
+function startChromeDriver(cb) {
+  const args = [
+    '--url-base=wd/hub',
+    `--port=4444`
+  ]
+
+  let child = childProcess.execFile(chromedriver.path, args)
+
+  child.stdout.on('data', (data) => {
+    if (data.indexOf('ChromeDriver was started successfully') !== -1) {
       child.stdout.removeAllListeners()
       cb()
       cb = function noop () {}
