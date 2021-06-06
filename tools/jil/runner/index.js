@@ -130,6 +130,12 @@ function loadBrowsersAndRunTests () {
       }
     }
 
+    if (browser.isLocalChrome()) {
+      desired.chromeOptions = {
+        args: ['--headless', '--disable-gpu', '--window-size=10,10']
+      }
+    }
+
     desired.build = buildIdentifier
     desired.name = `${buildIdentifier}-${browser.toString()}`
 

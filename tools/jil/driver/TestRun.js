@@ -195,6 +195,8 @@ class TestRun extends EventEmitter {
   }
 
   _initializeBrowser (connectionInfo, browserSpec, rootURL, numberOfRetries, retry) {
+    console.log('initialize browser with', browserSpec.desired)
+
     if (!retry) retry = 0
     return wd
       .promiseChainRemote(connectionInfo)
