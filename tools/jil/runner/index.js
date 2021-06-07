@@ -132,7 +132,7 @@ function loadBrowsersAndRunTests () {
 
     if (browser.isLocalChrome()) {
       desired.chromeOptions = {
-        args: ['--headless', '--disable-gpu', '--window-size=10,10']
+        args: ['--headless', '--disable-gpu', '--window-size=800,600']
       }
     }
 
