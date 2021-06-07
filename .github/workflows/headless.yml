@@ -18,4 +18,4 @@ jobs:
       - name: build
         run: npm run ci-build
       - name: run tests
-        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest -s -t 10000 tests/functional/final-harvest.test.js
+        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest -s -t 10000 --no-retry tests/functional/final-harvest.test.js
