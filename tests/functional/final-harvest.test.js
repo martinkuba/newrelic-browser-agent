@@ -107,12 +107,25 @@ testDriver.test('final harvest doesnt append pageHide if already previously reco
   let loadPromise = browser.safeGet(url).catch(fail)
   let start = Date.now()
 
+  loadPromise.then(() => {
+    console.log('load promise resolved')
+  })
+
   Promise.all([loadPromise, router.expectRum()])
       .then(() => {
         const clickPromise = browser
           .elementById('btn1').click()
           .get(router.assetURL('/'))
         const timingsPromise = router.expectTimings()
+
+        clickPromise.then(() => {
+          console.log('click promise resolved')
+        })
+
+        timingsPromise.then(() => {
+          console.log('timings resolved')
+        })
+
         return Promise.all([timingsPromise, clickPromise])
       })
       .then(([{body, query}]) => {
@@ -272,7 +285,7 @@ testDriver.test('final harvest doesnt append pageHide if already previously reco
 //       t.end()
 //     })
 //     .catch(fail)
-
+  
 //   function fail (err) {
 //     t.error(err)
 //     t.end()
