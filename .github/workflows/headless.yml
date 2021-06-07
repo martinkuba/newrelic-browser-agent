@@ -1,0 +1,21 @@
+name: Headless Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  headless-chrome:
+    runs-on: ubuntu-latest
+    container: node:14
+    env:
+      NEWRELIC_ENVIRONMENT: ci
+      JIL_SAUCE_LABS_USERNAME: ${{ secrets.JIL_SAUCE_LABS_USERNAME }}
+      JIL_SAUCE_LABS_ACCESS_KEY: ${{ secrets.JIL_SAUCE_LABS_ACCESS_KEY }}
+      NEW_RELIC_LICENSE_KEY: ${{ secrets.JIL_NODE_NEW_RELIC_LICENSE_KEY }}
+      BUILD_NUMBER: PR${{ github.event.number }}-latest-${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: npm run ci-build
+      - name: run tests
+        run: node ./tools/jil/bin/cli.js -f merged -b chrome@latest -s -t 85000 tests/functional/final-harvest.test.js
