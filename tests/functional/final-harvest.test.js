@@ -103,7 +103,7 @@ let reliableResourcesHarvest = reliableFinalHarvest.and(excludeUnreliableResourc
 // })
 
 testDriver.test('final harvest doesnt append pageHide if already previously recorded', reliableFinalHarvest, function (t, browser, router) {
-  let url = router.assetURL('pageHide.html', { loader: 'rum' })
+  let url = router.assetURL('pagehide.html', { loader: 'rum' })
   let loadPromise = browser.safeGet(url).catch(fail)
   let start = Date.now()
 
@@ -111,7 +111,12 @@ testDriver.test('final harvest doesnt append pageHide if already previously reco
     console.log('load promise resolved')
   })
 
-  Promise.all([loadPromise, router.expectRum()])
+  let rumPromise = router.expectRum()
+  rumPromise.then(() => {
+    console.log('rum promise resolved')
+  })
+
+  Promise.all([loadPromise, rumPromise])
       .then(() => {
         const clickPromise = browser
           .elementById('btn1').click()
