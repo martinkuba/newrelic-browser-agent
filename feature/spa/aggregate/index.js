@@ -468,7 +468,7 @@ baseEE.on('feat-spa', function () {
     setCurrentNode(prevNode)
   })
 
-  register.on(promiseEE, 'resolve-start', resolvePromise)
+  register.on(eromiseEE, 'resolve-start', resolvePromise)
   register.on(promiseEE, 'executor-err', resolvePromise)
 
   register.on(promiseEE, 'propagate', saveNode)

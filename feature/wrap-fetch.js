@@ -69,3 +69,38 @@ function wrapPromiseMethod (target, name, prefix) {
     }
   }
 }
+
+function wrapPromise(target, fnName, ee, contextManager) {
+  var fn = target[fnName]
+  target[fnName] = function() {
+    var applyThis = this, args = arguments
+    var context = createContext()
+    contextManager.propagatePromiseFn(context, function() {
+      ee.emit('before-start', [args], context)
+      var p = fn.apply(applyThis, args)
+      ee.emit('start', [args], context)
+
+      return p.then(function(val) {
+        ee.emit(prefix + 'end', [null, val], context)
+        return val
+      })
+    })
+  }
+}
+
+function DefaultContextManager() {
+}
+DefaultContextManager.prototype.propagatePromiseFn = function(context, fn) {
+  var p = fn()
+  p['nr@context'] = context
+}
+
+function ZoneContextManager() {
+  this.count = 0
+}
+ZoneContextManager.prototype.propagatePromiseFn = function(context, fn) {
+  var newZone = Zone.current.fork({
+    name: 'zone' + (++this.count)
+  })
+  return newZone.run(fn, context)
+}
