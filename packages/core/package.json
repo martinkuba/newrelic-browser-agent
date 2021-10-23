@@ -1,5 +1,5 @@
 {
-  "name": "browser-agent",
+  "name": "@newrelic/browser-agent",
   "version": "2.0.0",
   "private": true,
   "author": "The New Relic Browser Team",
