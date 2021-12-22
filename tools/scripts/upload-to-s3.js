@@ -42,11 +42,6 @@ if (!argv['bucket']) {
   return process.exit(1)
 }
 
-if (!argv['role']) {
-  console.log('S3 role ARN must be specified')
-  return process.exit(1)
-}
-
 var assetFilenames = allAssetFilenames()
 var loaders = assetFilenames.loaders
 var payloads = assetFilenames.payloads
@@ -67,7 +62,13 @@ var agentVersion = fs.readFileSync(
   'utf-8'
 ).trim()
 
-var steps = [ initialize, loadFiles ]
+var steps = []
+if (argv['role']) {
+  steps.push(initializeWithRole)
+} else {
+  steps.push(initialize)
+}
+steps.push(loadFiles)
 steps.push(uploadAllToS3)
 
 asyncForEach(steps, function (fn, next) {
@@ -86,6 +87,15 @@ asyncForEach(steps, function (fn, next) {
 })
 
 function initialize(cb) {
+  var creds = {
+    accessKeyId: process.env['AWS_ACCESS_KEY_ID'],
+    secretAccessKey: process.env['AWS_SECRET_ACCESS_KEY']
+  }
+  s3 = new AWS.S3(creds)
+  process.nextTick(cb)
+}
+
+function initializeWithRole(cb) {
   var roleToAssume = {
     RoleArn: argv['role'],
     RoleSessionName: 'uploadToS3Session',
