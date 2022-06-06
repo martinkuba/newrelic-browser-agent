@@ -4,7 +4,7 @@
  */
 
 var ee = require('ee').get('timer')
-var wrapFn = require('../wrap-function')(ee)
+var wrapFn = require('../wrap-function')(ee, false, 'timer')
 
 var SET_TIMEOUT = 'setTimeout'
 var SET_INTERVAL = 'setInterval'

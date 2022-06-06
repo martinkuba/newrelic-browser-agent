@@ -4,7 +4,7 @@
  */
 
 var ee = require('ee').get('mutation')
-var wrapFn = require('../wrap-function')(ee)
+var wrapFn = require('../wrap-function')(ee, false, 'mutation')
 var OriginalObserver = NREUM.o.MO
 
 module.exports = ee

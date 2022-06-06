@@ -5,6 +5,7 @@
 
 var ee = require('ee')
 var slice = require('lodash._slice')
+var context = require('context')
 var flag = 'nr@original'
 var has = Object.prototype.hasOwnProperty
 var inWrapper = false
@@ -14,7 +15,7 @@ module.exports.wrapFunction = wrapFunction
 module.exports.wrapInPlace = wrapInPlace
 module.exports.argsToArray = argsToArray
 
-function createWrapperWithEmitter(emitter, always) {
+function createWrapperWithEmitter(emitter, always, source) {
   emitter || (emitter = ee)
 
   wrapFn.inPlace = inPlace
@@ -51,6 +52,10 @@ function createWrapperWithEmitter(emitter, always) {
         report([e, '', [args, originalThis, methodName], ctx], emitter)
       }
 
+      var ctxObj = ee.context(ctx)
+      ctxObj.source = source
+      context.setCurrentContext(ctxObj)
+
       // Warning: start events may mutate args!
       safeEmit(prefix + 'start', [args, originalThis, methodName], ctx, bubble)
 
@@ -63,6 +68,8 @@ function createWrapperWithEmitter(emitter, always) {
         // rethrow error so we don't effect execution by observing.
         throw err
       } finally {
+        context.removeCurrentContext(ctxObj)
+
         // happens no matter what.
         safeEmit(prefix + 'end', [args, originalThis, result], ctx, bubble)
       }
@@ -86,7 +93,8 @@ function createWrapperWithEmitter(emitter, always) {
       // so we don't add extra properties with undefined values.
       if (notWrappable(fn)) continue
 
-      obj[method] = wrapFn(fn, (prependMethodPrefix ? method + prefix : prefix), getContext, method, bubble)
+      obj[method] = wrapFn(fn, (prependMethodPrefix ? method + prefix : prefix),
+        getContext, method, bubble, source)
     }
   }
 

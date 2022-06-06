@@ -5,7 +5,7 @@
 
 // Request Animation Frame wrapper
 var ee = require('ee').get('raf')
-var wrapFn = require('../wrap-function')(ee)
+var wrapFn = require('../wrap-function')(ee, false, 'raf')
 
 var equestAnimationFrame = 'equestAnimationFrame'
 

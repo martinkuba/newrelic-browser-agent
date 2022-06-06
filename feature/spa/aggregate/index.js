@@ -30,6 +30,7 @@ var eventListenerOpts = require('event-listener-opts')
 
 var uniqueId = require('../../../loader/unique-id')
 var otlp = require('../../../agent/otlp-transformer')
+var context = require('context')
 
 var INTERACTION_EVENTS = [
   'click',
@@ -603,6 +604,8 @@ function setCurrentNode (newNode) {
 
   prevNode = currentNode
   currentNode = (newNode && !newNode[INTERACTION].root.end) ? newNode : null
+
+  context.getCurrentContext()[SPA_NODE] = currentNode
 }
 
 function onInteractionFinished(interaction) {
