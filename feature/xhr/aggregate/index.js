@@ -20,6 +20,7 @@ var setDenyList = require('./deny-list').setDenyList
 var shouldCollectEvent = require('./deny-list').shouldCollectEvent
 var subscribeToUnload = require('../../../agent/unload')
 var recordSupportability = require('metrics').recordSupportability
+var otlp = require('../../../agent/otlp-transformer')
 
 var ajaxEvents = []
 var spaAjaxEvents = {}
@@ -41,12 +42,12 @@ baseEE.on('feat-err', function() {
     return { body: agg.take([ 'xhr' ]) }
   })
 
-  if (allAjaxIsEnabled()) {
-    scheduler = new HarvestScheduler(loader, 'events', { onFinished: onEventsHarvestFinished, getPayload: prepareHarvest })
-    scheduler.startTimer(harvestTimeSeconds)
+  // if (allAjaxIsEnabled()) {
+  //   scheduler = new HarvestScheduler(loader, 'events', { onFinished: onEventsHarvestFinished, getPayload: prepareHarvest })
+  //   scheduler.startTimer(harvestTimeSeconds)
 
-    subscribeToUnload(finalHarvest)
-  }
+  //   subscribeToUnload(finalHarvest)
+  // }
 })
 
 module.exports = storeXhr
@@ -94,6 +95,8 @@ function storeXhr(params, metrics, startTime, endTime, type) {
   var xhrContext = this
 
   var event = {
+    protocol: params.protocol,
+    port: params.port,
     method: params.method,
     status: params.status,
     domain: params.host,
@@ -118,7 +121,8 @@ function storeXhr(params, metrics, startTime, endTime, type) {
     spaAjaxEvents[interactionId] = spaAjaxEvents[interactionId] || []
     spaAjaxEvents[interactionId].push(event)
   } else {
-    ajaxEvents.push(event)
+    // ajaxEvents.push(event)
+    otlp.addAjaxCall(event)
   }
 }
 
@@ -133,7 +137,8 @@ baseEE.on('interactionDiscarded', function (interaction) {
 
   spaAjaxEvents[interaction.id].forEach(function (item) {
     // move it from the spaAjaxEvents buffer to the ajaxEvents buffer for harvesting here
-    ajaxEvents.push(item)
+    // ajaxEvents.push(item)
+    otlp.addAjaxCall(event)
   })
   delete spaAjaxEvents[interaction.id]
 })

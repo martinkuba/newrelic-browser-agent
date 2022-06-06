@@ -21,6 +21,10 @@ var baseEE = require('ee')
 var mapOwn = require('map-own')
 var config = require('config')
 var truncateSize = require('./format-stack-trace').truncateSize
+
+var otlp = require('../../../agent/otlp-transformer')
+var getCurrentContext = require('wrap-function').getCurrentContext
+
 var errorCache = {}
 var currentBody
 
@@ -37,9 +41,9 @@ ee.on('feat-err', function () {
   register('err', storeError)
   register('ierr', storeError)
 
-  harvest.on('jserrors', onHarvestStarted)
-  var scheduler = new HarvestScheduler(loader, 'jserrors', { onFinished: onHarvestFinished })
-  scheduler.startTimer(harvestTimeSeconds)
+  // harvest.on('jserrors', onHarvestStarted)
+  // var scheduler = new HarvestScheduler(loader, 'jserrors', { onFinished: onHarvestFinished })
+  // scheduler.startTimer(harvestTimeSeconds)
 })
 
 function onHarvestStarted(options) {
@@ -179,6 +183,8 @@ function storeError (err, time, internal, customAttributes) {
   // stn and spa aggregators listen to this event - stn sends the error in its payload,
   // and spa annotates the error with interaction info
   handle('errorAgg', [type, hash, params, newMetrics])
+  var context = getCurrentContext()
+  otlp.addError(type, hash, params, newMetrics, att, customAttributes, context)
 
   if (params._interactionId != null) {
     // hold on to the error until the interaction finishes

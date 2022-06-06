@@ -14,6 +14,7 @@ var navCookie = require('./nav-cookie')
 var config = require('config')
 var frameworks = require('framework-detection')
 var metrics = require('metrics')
+var featureFlags = require('./feature-flags')
 
 // api loads registers several event listeners, but does not have any exports
 require('./api')
@@ -38,6 +39,13 @@ registerHandler('mark', stopwatch.mark, 'api')
 stopwatch.mark('done')
 
 drain('api')
+
+// enable features
+activateFeatures({
+  spa: true,
+  err: true,
+  xhr: true
+})
 
 if (autorun) harvest.sendRUM(loader)
 

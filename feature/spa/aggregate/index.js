@@ -28,6 +28,9 @@ var Interaction = require('./Interaction')
 var config = require('config')
 var eventListenerOpts = require('event-listener-opts')
 
+var uniqueId = require('../../../loader/unique-id')
+var otlp = require('../../../agent/otlp-transformer')
+
 var INTERACTION_EVENTS = [
   'click',
   'submit',
@@ -196,12 +199,17 @@ baseEE.on('feat-spa', function () {
         var ixn = new Interaction(evName, this[FN_START], lastSeenUrl, lastSeenRouteName, onInteractionFinished)
         setCurrentNode(ixn.root)
 
+        var actionText
         if (evName === 'click') {
           var value = getActionText(ev.target)
           if (value) {
+            actionText = value
             currentNode.attrs.custom['actionText'] = value
           }
         }
+
+        otlp.addInteractionEvent(evName, actionText)
+
         // @ifdef SPA_DEBUG
         console.timeStamp('start interaction, ID=' + currentNode.id + ', evt=' + evName)
         // @endif
@@ -407,6 +415,7 @@ baseEE.on('feat-spa', function () {
     if (currentNode) {
       if (lastSeenUrl !== url) {
         currentNode[INTERACTION].routeChange = true
+        otlp.addUrlChange(url, lastSeenUrl)
       }
       if (hashChangedDuringCb) {
         nodeOnLastHashUpdate = currentNode
@@ -675,8 +684,11 @@ function saveInteraction (interaction) {
     interaction.root.attrs.firstContentfulPaint = paintMetrics['first-contentful-paint']
   }
   baseEE.emit('interactionSaved', [interaction])
-  interactionsToHarvest.push(interaction)
-  scheduler.scheduleHarvest(0)
+
+  otlp.addBrowserInteraction(interaction)
+
+  // interactionsToHarvest.push(interaction)
+  // scheduler.scheduleHarvest(0)
 }
 
 function isEnabled() {

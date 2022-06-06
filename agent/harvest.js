@@ -14,6 +14,7 @@ var aggregator = require('./aggregator')
 var stopwatch = require('./stopwatch')
 var locationUtil = require('./location')
 var config = require('config')
+var otlp = require('./otlp-transformer')
 
 var cleanURL = require('./clean-url')
 var obfuscate = require('./obfuscate')
@@ -115,10 +116,12 @@ function sendRUM(nr) {
 
     var queryString = encode.fromArray(chunksForQueryString, nr.maxBytes)
 
-    submitData.jsonp(
-      scheme + '://' + nr.info.beacon + '/' + protocol + '/' + nr.info.licenseKey + queryString,
-      jsonp
-    )
+    otlp.addPageView(measuresMetrics)
+
+    // submitData.jsonp(
+    //   scheme + '://' + nr.info.beacon + '/' + protocol + '/' + nr.info.licenseKey + queryString,
+    //   jsonp
+    // )
   }
 }
 

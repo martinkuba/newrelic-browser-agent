@@ -9,6 +9,7 @@ var getAddStringContext = require('./bel-serializer').getAddStringContext
 var addCustomAttributes = require('./bel-serializer').addCustomAttributes
 var now = require('now')
 var mapOwn = require('map-own')
+var otlp = require('./otlp-transformer')
 
 var loader = null
 var harvest = require('./harvest')
@@ -70,7 +71,7 @@ function init(nr, options) {
   }, maxLCPTimeSeconds * 1000)
 
   // send initial data sooner, then start regular
-  scheduler.startTimer(harvestTimeSeconds, initialHarvestSeconds)
+  // scheduler.startTimer(harvestTimeSeconds, initialHarvestSeconds)
 }
 
 function recordLcp() {
@@ -154,11 +155,12 @@ function addTiming(name, value, attrs, addCls) {
     attrs['cls'] = cls
   }
 
-  timings.push({
-    name: name,
-    value: value,
-    attrs: attrs
-  })
+  // timings.push({
+  //   name: name,
+  //   value: value,
+  //   attrs: attrs
+  // })
+  otlp.addTiming(name, value, attrs)
 
   handle('pvtAdded', [name, value, attrs])
 }
