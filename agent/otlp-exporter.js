@@ -1,6 +1,8 @@
 var uniqueId = require('../loader/unique-id')
 var getCurrentContext = require('context').getCurrentContext
 var subscribeToUnload = require('./unload')
+var cleanURL = require('./clean-url')
+var locationUtil = require('./location')
 
 var events = []
 var spans = []
@@ -120,9 +122,26 @@ function getResource() {
     droppedAttributesCount: 0
   }
 
+  var location = cleanURL(locationUtil.getLocation())
+
   addAttribute(resource.attributes, 'service.name',
     NREUM.otlp.resource.serviceName || 'unknown_service')
   addAttribute(resource.attributes, 'session.id', sessionId)
+  addAttribute(resource.attributes, 'pageUrl', location)
+
+  if (navigator.userAgentData) {
+    var brands = navigator.userAgentData.brands
+    addAttribute(resource.attributes, 'browser.brands', brands.map(function(b) {
+      return b.brand + ' ' + b.version
+    }))
+    addAttribute(resource.attributes, 'browser.platform', navigator.userAgentData.platform)
+
+    // this should be parsed by the servier from brands instead
+    addAttribute(resource.attributes, 'browser.brand', brands[brands.length - 1].brand)
+    addAttribute(resource.attributes, 'browser.version', brands[brands.length - 1].version)
+  } else {
+    addAttribute(resource.attributes, 'browser.user_agent', navigator.userAgent)
+  }
 
   return resource
 }
@@ -208,10 +227,25 @@ function addAttribute(attributes, name, value) {
     key: name,
     value: {}
   }
-  if (typeof value === 'string') {
-    attribute.value.stringValue = value
-  } else if (typeof value === 'number') {
-    attribute.value.doubleValue = value 
+  if (Array.isArray(value)) {
+    attribute.value.arrayValue = {
+      values: []
+    }
+    value.forEach(function(item) {
+      var container = {}
+      addAttributeValue(container, item)
+      attribute.value.arrayValue.values.push(container)
+    })
+  } else {
+    addAttributeValue(attribute.value, value)
   }
   attributes.push(attribute)
+}
+
+function addAttributeValue(container, value) {
+  if (typeof value === 'string') {
+    container.stringValue = value
+  } else if (typeof value === 'number') {
+    container.doubleValue = value 
+  }
 }
