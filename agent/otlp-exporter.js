@@ -177,7 +177,10 @@ function getLogRecords(events) {
   events.forEach(function(event) {
     var log = {
       timeUnixNano: event.timestamp,
-      attributes: []
+      attributes: [],
+      body: {
+        stringValue: event.name
+      }
     }
     addAttribute(log.attributes, 'event.name', event.name)
     if (event.attributes) {
