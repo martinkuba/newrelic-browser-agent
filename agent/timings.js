@@ -187,8 +187,8 @@ function onHarvestFinished(result) {
 function finalHarvest() {
   recordLcp()
   recordUnload()
-  var payload = prepareHarvest({ retry: false })
-  harvest.send('events', loader, payload, { unload: true })
+  // var payload = prepareHarvest({ retry: false })
+  // harvest.send('events', loader, payload, { unload: true })
 }
 
 function appendGlobalCustomAttributes(timing) {

@@ -1,5 +1,6 @@
 var uniqueId = require('../loader/unique-id')
 var getCurrentContext = require('context').getCurrentContext
+var subscribeToUnload = require('./unload')
 
 var events = []
 var spans = []
@@ -10,7 +11,8 @@ module.exports = {
   addSpan: addSpan
 }
 
-scheduleHarvest()
+scheduleHarvest(scheduleHarvest)
+subscribeToUnload(sendHarvest, true)
 
 function addEvent(name, attributes, traceId, spanId) {
   var context = getCurrentContext()
@@ -41,7 +43,7 @@ function addSpan(name, startTime, endTime, spanId, traceId, parentSpanId, attrib
   })
 }
 
-function scheduleHarvest() {
+function sendHarvest() {
   var url = NREUM.otlp.url
   if (events.length > 0) {
     var data = createLogsPayload(events)
@@ -56,15 +58,26 @@ function scheduleHarvest() {
     send(url + '/v1/traces', data)
     spans = []
   }
+  scheduleHarvest()
+}
 
-  setTimeout(scheduleHarvest, 5000)
+function scheduleHarvest() {
+  setTimeout(sendHarvest, 5000)
 }
 
 function send(url, data) {
-  var request = new XMLHttpRequest()
-  request.open('POST', url)
-  request.setRequestHeader('content-type', 'application/json')
-  request.send(JSON.stringify(data))
+  if (navigator.sendBeacon) {
+    headers = {
+      type: 'application/json',
+    }
+    var blob = new Blob([JSON.stringify(data)], headers)
+    navigator.sendBeacon(url, blob)
+  } else {
+    var request = new XMLHttpRequest()
+    request.open('POST', url)
+    request.setRequestHeader('content-type', 'application/json')
+    request.send(JSON.stringify(data))
+  }
 }
 
 function createSpansPayload(spans) {
