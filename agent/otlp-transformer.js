@@ -103,18 +103,13 @@ function addUrlChange(url, previousUrl) {
   })
 }
 
-function addError(type, hash, params, newMetrics, att, customAttributes, context) {
-  var traceId, spanId
-  if (context && context.spaNode) {
-    traceId = context.spaNode.interaction.traceId
-    spanId = context.spaNode.spanId
-  }
-
+function addError(type, hash, params, newMetrics, att, customAttributes) {
   exporter.addEvent('exception', {
     'exception.type': params.exceptionClass,
     'exception.message': params.message,
-    'exception.stacktrace': params.stack_trace
-  }, traceId, spanId)
+    'exception.stacktrace': params.stack_trace,
+    'exception.hash': hash
+  })
 }
 
 function addTiming(name, value, attrs) {

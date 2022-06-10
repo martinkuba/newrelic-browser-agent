@@ -23,7 +23,6 @@ var config = require('config')
 var truncateSize = require('./format-stack-trace').truncateSize
 
 var otlp = require('../../../agent/otlp-transformer')
-var getCurrentContext = require('wrap-function').getCurrentContext
 
 var errorCache = {}
 var currentBody
@@ -183,26 +182,27 @@ function storeError (err, time, internal, customAttributes) {
   // stn and spa aggregators listen to this event - stn sends the error in its payload,
   // and spa annotates the error with interaction info
   handle('errorAgg', [type, hash, params, newMetrics])
-  var context = getCurrentContext()
-  otlp.addError(type, hash, params, newMetrics, att, customAttributes, context)
 
-  if (params._interactionId != null) {
-    // hold on to the error until the interaction finishes
-    errorCache[params._interactionId] = errorCache[params._interactionId] || []
-    errorCache[params._interactionId].push([type, hash, params, newMetrics, att, customAttributes])
-  } else {
-    // store custom attributes
-    var customParams = {}
-    var att = loader.info.jsAttributes
-    mapOwn(att, setCustom)
-    if (customAttributes) {
-      mapOwn(customAttributes, setCustom)
-    }
+  var att = loader.info.jsAttributes
+  otlp.addError(type, hash, params, newMetrics, att, customAttributes)
 
-    var jsAttributesHash = stringHashCode(stringify(customParams))
-    var aggregateHash = hash + ':' + jsAttributesHash
-    agg.store(type, aggregateHash, params, newMetrics, customParams)
-  }
+  // if (params._interactionId != null) {
+  //   // hold on to the error until the interaction finishes
+  //   errorCache[params._interactionId] = errorCache[params._interactionId] || []
+  //   errorCache[params._interactionId].push([type, hash, params, newMetrics, att, customAttributes])
+  // } else {
+  //   // store custom attributes
+  //   var customParams = {}
+  //   var att = loader.info.jsAttributes
+  //   mapOwn(att, setCustom)
+  //   if (customAttributes) {
+  //     mapOwn(customAttributes, setCustom)
+  //   }
+
+  //   var jsAttributesHash = stringHashCode(stringify(customParams))
+  //   var aggregateHash = hash + ':' + jsAttributesHash
+  //   agg.store(type, aggregateHash, params, newMetrics, customParams)
+  // }
 
   function setCustom (key, val) {
     customParams[key] = (val && typeof val === 'object' ? stringify(val) : val)
