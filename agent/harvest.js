@@ -14,6 +14,7 @@ var aggregator = require('./aggregator')
 var stopwatch = require('./stopwatch')
 var locationUtil = require('./location')
 var config = require('config')
+var navigation = require('./navigation')
 var otlp = require('./otlp-transformer')
 
 var cleanURL = require('./clean-url')
@@ -116,7 +117,11 @@ function sendRUM(nr) {
 
     var queryString = encode.fromArray(chunksForQueryString, nr.maxBytes)
 
+    // report as a page-view event with our custom measurements
     otlp.addPageView(measuresMetrics)
+
+    // or better might be to report navigation timing data
+    navigation.report()
 
     // submitData.jsonp(
     //   scheme + '://' + nr.info.beacon + '/' + protocol + '/' + nr.info.licenseKey + queryString,
