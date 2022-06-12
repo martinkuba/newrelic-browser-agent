@@ -138,7 +138,7 @@ baseEE.on('interactionDiscarded', function (interaction) {
   spaAjaxEvents[interaction.id].forEach(function (item) {
     // move it from the spaAjaxEvents buffer to the ajaxEvents buffer for harvesting here
     // ajaxEvents.push(item)
-    otlp.addAjaxCall(event)
+    otlp.addAjaxCall(item)
   })
   delete spaAjaxEvents[interaction.id]
 })
