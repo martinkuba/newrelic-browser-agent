@@ -23,8 +23,8 @@ function observe(list, observer) {
 function report() {
   if (!entry) {
     entry = performance.getEntriesByType('navigation')[0]
+    otlpExporter.addEvent('navigation', getAttributes(entry))
   }
-  otlpExporter.addEvent('navigation', getAttributes(entry))
 }
 
 function getAttributes(entry) {

@@ -23,6 +23,12 @@ function addEvent(name, attributes, traceId, spanId) {
     traceId = context.spaNode.interaction.traceId
   }
 
+  if (!attributes) {
+    attributes = {}
+  }
+  var location = cleanURL(locationUtil.getLocation())
+  attributes['pageUrl'] = location
+
   var timestamp = (performance.timeOrigin + performance.now()) * 10e5
   events.push({
     timestamp: timestamp,
@@ -34,6 +40,12 @@ function addEvent(name, attributes, traceId, spanId) {
 }
 
 function addSpan(name, startTime, endTime, spanId, traceId, parentSpanId, attributes) {
+  if (!attributes) {
+    attributes = {}
+  }
+  var location = cleanURL(locationUtil.getLocation())
+  attributes['pageUrl'] = location
+
   spans.push({
     name: name,
     startTime: (performance.timeOrigin + startTime) * 10e5,
@@ -122,12 +134,9 @@ function getResource() {
     droppedAttributesCount: 0
   }
 
-  var location = cleanURL(locationUtil.getLocation())
-
   addAttribute(resource.attributes, 'service.name',
     NREUM.otlp.resource.serviceName || 'unknown_service')
   addAttribute(resource.attributes, 'session.id', sessionId)
-  addAttribute(resource.attributes, 'pageUrl', location)
 
   if (navigator.userAgentData) {
     var brands = navigator.userAgentData.brands
