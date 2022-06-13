@@ -6,7 +6,8 @@
 module.exports = {
   generateUuid: generateUuid,
   generateSpanId: generateSpanId,
-  generateTraceId: generateTraceId
+  generateTraceId: generateTraceId,
+  generateSessionId: generateSessionId
 }
 
 function generateUuid () {
@@ -55,6 +56,10 @@ function generateSpanId () {
 // 32-character hex string (per DT spec)
 function generateTraceId() {
   return generateRandomHexString(32)
+}
+
+function generateSessionId() {
+  return generateRandomHexString(16)
 }
 
 function generateRandomHexString(length) {

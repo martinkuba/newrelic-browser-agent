@@ -21,6 +21,9 @@ var baseEE = require('ee')
 var mapOwn = require('map-own')
 var config = require('config')
 var truncateSize = require('./format-stack-trace').truncateSize
+
+var otlp = require('../../../agent/otlp-transformer')
+
 var errorCache = {}
 var currentBody
 
@@ -37,9 +40,9 @@ ee.on('feat-err', function () {
   register('err', storeError)
   register('ierr', storeError)
 
-  harvest.on('jserrors', onHarvestStarted)
-  var scheduler = new HarvestScheduler(loader, 'jserrors', { onFinished: onHarvestFinished })
-  scheduler.startTimer(harvestTimeSeconds)
+  // harvest.on('jserrors', onHarvestStarted)
+  // var scheduler = new HarvestScheduler(loader, 'jserrors', { onFinished: onHarvestFinished })
+  // scheduler.startTimer(harvestTimeSeconds)
 })
 
 function onHarvestStarted(options) {
@@ -180,23 +183,26 @@ function storeError (err, time, internal, customAttributes) {
   // and spa annotates the error with interaction info
   handle('errorAgg', [type, hash, params, newMetrics])
 
-  if (params._interactionId != null) {
-    // hold on to the error until the interaction finishes
-    errorCache[params._interactionId] = errorCache[params._interactionId] || []
-    errorCache[params._interactionId].push([type, hash, params, newMetrics, att, customAttributes])
-  } else {
-    // store custom attributes
-    var customParams = {}
-    var att = loader.info.jsAttributes
-    mapOwn(att, setCustom)
-    if (customAttributes) {
-      mapOwn(customAttributes, setCustom)
-    }
+  var att = loader.info.jsAttributes
+  otlp.addError(type, hash, params, newMetrics, att, customAttributes)
 
-    var jsAttributesHash = stringHashCode(stringify(customParams))
-    var aggregateHash = hash + ':' + jsAttributesHash
-    agg.store(type, aggregateHash, params, newMetrics, customParams)
-  }
+  // if (params._interactionId != null) {
+  //   // hold on to the error until the interaction finishes
+  //   errorCache[params._interactionId] = errorCache[params._interactionId] || []
+  //   errorCache[params._interactionId].push([type, hash, params, newMetrics, att, customAttributes])
+  // } else {
+  //   // store custom attributes
+  //   var customParams = {}
+  //   var att = loader.info.jsAttributes
+  //   mapOwn(att, setCustom)
+  //   if (customAttributes) {
+  //     mapOwn(customAttributes, setCustom)
+  //   }
+
+  //   var jsAttributesHash = stringHashCode(stringify(customParams))
+  //   var aggregateHash = hash + ':' + jsAttributesHash
+  //   agg.store(type, aggregateHash, params, newMetrics, customParams)
+  // }
 
   function setCustom (key, val) {
     customParams[key] = (val && typeof val === 'object' ? stringify(val) : val)

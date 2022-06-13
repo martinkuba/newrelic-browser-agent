@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+var uniqueId = require('../../../loader/unique-id')
+
 var MAX_NODES = 128
 
 var lastId = 0
@@ -20,6 +22,7 @@ function InteractionNode (interaction, parent, type, timestamp) {
   this.jsTime = 0
   this.attrs = {}
   this.cancelled = false
+  this.spanId = uniqueId.generateSpanId()
 }
 
 var InteractionNodePrototype = InteractionNode.prototype

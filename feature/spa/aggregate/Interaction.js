@@ -7,6 +7,7 @@ var baseEE = require('ee')
 var mapOwn = require('map-own')
 var loader = require('loader')
 var InteractionNode = require('./InteractionNode')
+var uniqueId = require('../../../loader/unique-id')
 
 var originals = NREUM.o
 var originalSetTimeout = originals.ST
@@ -26,6 +27,7 @@ function Interaction (eventName, timestamp, url, routeName, onFinished) {
   this.lastCb = this.lastFinish = timestamp
   this.handlers = []
   this.onFinished = onFinished
+  this.traceId = uniqueId.generateTraceId()
 
   var root = this.root = new InteractionNode(this, null, 'interaction', timestamp)
   var attrs = root.attrs
