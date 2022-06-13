@@ -15,7 +15,7 @@ module.exports.wrapFunction = wrapFunction
 module.exports.wrapInPlace = wrapInPlace
 module.exports.argsToArray = argsToArray
 
-function createWrapperWithEmitter(emitter, always, source) {
+function createWrapperWithEmitter(emitter, always) {
   emitter || (emitter = ee)
 
   wrapFn.inPlace = inPlace
@@ -53,7 +53,6 @@ function createWrapperWithEmitter(emitter, always, source) {
       }
 
       var ctxObj = ee.context(ctx)
-      ctxObj.source = source
       context.setCurrentContext(ctxObj)
 
       // Warning: start events may mutate args!
@@ -94,7 +93,7 @@ function createWrapperWithEmitter(emitter, always, source) {
       if (notWrappable(fn)) continue
 
       obj[method] = wrapFn(fn, (prependMethodPrefix ? method + prefix : prefix),
-        getContext, method, bubble, source)
+        getContext, method, bubble)
     }
   }
 

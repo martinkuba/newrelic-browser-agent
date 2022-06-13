@@ -5,7 +5,7 @@
 
 // History pushState wrapper
 var ee = require('ee').get('history')
-var wrapFn = require('../wrap-function')(ee, false, 'history')
+var wrapFn = require('../wrap-function')(ee)
 
 module.exports = ee
 

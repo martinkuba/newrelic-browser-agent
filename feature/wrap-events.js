@@ -4,7 +4,7 @@
  */
 
 var ee = require('ee').get('events')
-var wrapFn = require('../wrap-function')(ee, true, 'events')
+var wrapFn = require('../wrap-function')(ee, true)
 var getOrSet = require('gos')
 
 var XHR = XMLHttpRequest
